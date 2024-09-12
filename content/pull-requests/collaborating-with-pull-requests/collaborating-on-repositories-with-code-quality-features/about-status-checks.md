@@ -87,6 +87,16 @@ Alternatively, to skip or request _all_ checks for your commit, add one of the f
 
 {% data reusables.commits.about-commit-cleanup %}
 
+### Evaluation of concurrently reported check values
+
+It is possible for multiple sources to report values for the same check. A common example would be GitHub Actions workflows with a job named corresponding to a required check. 
+For example, let's say a branch has a required check called `test`. If there are multiple workflows each with a job named `test`, they will all *eventually* contribute to the
+final value of the check. If one of them fails, the check will be marked as failed, as you would expect. But the check engine will not wait for all workflows to finish before
+evaluating the check value - it will aggregate values *as they are reported*; a check might be first marked as successful by a quick workflow just to later be changed
+to failed by a slower workflow. In other words, there can be a time window when a pull request is able to merge even if it would be prevented from doing so by other pending workflows.
+This behavior is especially important to be aware of if using the auto-merge feature as pull requests will be merged as soon as the *first* successful check value is reported.
+
+
 {% ifversion status-check-retention %}
 
 ### Retention of checks
